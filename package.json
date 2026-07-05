@@ -1,0 +1,10 @@
+{
+  "name": "vision3d-ai-generator",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node local-server.js",
+    "vercel-dev": "vercel dev --listen 3000",
+    "start": "node local-server.js"
+  }
+}

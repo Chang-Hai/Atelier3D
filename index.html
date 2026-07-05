@@ -1,0 +1,1296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Image to 3D Model Online - AI 2D Image to 3D Generator</title>
+  <meta name="description" content="Upload a 2D image and turn it into an interactive 3D model online. Preview, rotate, share, and export your AI-generated 3D result.">
+  <meta name="keywords" content="image to 3d model, image to 3d, 2d image to 3d model, picture to 3d model, AI image to 3D model generator, convert image to 3D model">
+  <meta property="og:title" content="Image to 3D Model Online">
+  <meta property="og:description" content="Turn a 2D image into a shareable interactive 3D model scene.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
+  <style>
+    :root {
+      --ink: #131314;
+      --muted: #46464a;
+      --paper: #f9f8f4;
+      --surface: #faf9f5;
+      --surface-strong: #e9e8e4;
+      --sand: #e8e6dc;
+      --line: #c7c6ca;
+      --clay: #d97757;
+      --sage: #858384;
+      --white: #ffffff;
+      --shadow: 0 4px 24px rgba(19, 19, 20, .04);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      display: none;
+    }
+
+    a { color: inherit; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(249, 248, 244, .92);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(199, 198, 202, .45);
+    }
+
+    .nav {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-family: "Hanken Grotesk", sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--ink);
+      display: grid;
+      place-items: center;
+      color: var(--paper);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 28px; color: var(--muted); font-weight: 700; }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .ghost-link { color: var(--muted); text-decoration: none; font-weight: 700; }
+    .btn {
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: var(--radius);
+      min-height: 44px;
+      padding: 0 18px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(23, 23, 22, .14); }
+    .btn.secondary { background: transparent; color: var(--ink); }
+    .btn.soft { background: var(--surface); color: var(--ink); border-color: var(--line); }
+    .btn.clay { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .btn:disabled { cursor: not-allowed; opacity: .55; transform: none; box-shadow: none; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr);
+      gap: 64px;
+      align-items: start;
+      padding: 64px 0 128px;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: var(--sand);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--sage); }
+    h1, h2, h3, h4 { font-family: "Hanken Grotesk", sans-serif; margin: 0; letter-spacing: 0; }
+    h1 { font-size: clamp(42px, 5vw, 56px); line-height: 1.06; max-width: 560px; font-weight: 700; }
+    .hero-copy > p { margin: 0; color: var(--muted); font-size: 20px; line-height: 1.55; max-width: 560px; }
+
+    .upload-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .dropzone {
+      border: 1.5px dashed #bdb29f;
+      border-radius: var(--radius);
+      min-height: 204px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: rgba(232, 230, 220, .42);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .18s ease, background .18s ease;
+    }
+
+    .dropzone.is-dragging { border-color: var(--ink); background: rgba(232, 230, 220, .78); }
+    .dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      border-radius: 8px;
+      background: var(--surface-strong);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+    }
+    .dropzone strong { display: block; font-size: 20px; margin-bottom: 4px; }
+    .dropzone span { color: var(--muted); }
+    .file-note { color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+    .preview-card {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .preview-card img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; }
+    .preview-meta { min-width: 0; }
+    .preview-meta strong, .preview-meta span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preview-meta span { color: var(--muted); font-size: 14px; }
+
+    .generation-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .free-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .turnstile-row {
+      display: none;
+      margin-top: 14px;
+      min-height: 65px;
+    }
+    .turnstile-note {
+      display: none;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .option-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(232, 230, 220, .34);
+    }
+    .option-row strong { display: block; }
+    .option-row span { color: var(--muted); font-size: 14px; line-height: 1.35; }
+    .switch {
+      position: relative;
+      flex: 0 0 auto;
+      width: 48px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-strong);
+    }
+    .switch input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .switch i {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 3px;
+      top: 2px;
+      border-radius: 999px;
+      background: var(--white);
+      box-shadow: 0 2px 8px rgba(19, 19, 20, .18);
+      transition: transform .18s ease, background .18s ease;
+    }
+    .switch input:checked + i { transform: translateX(19px); background: var(--ink); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 9px;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stage-card {
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+      background: var(--sand);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(19, 19, 20, .08);
+      position: relative;
+      border: 1px solid rgba(199, 198, 202, .7);
+    }
+
+    .stage-toolbar {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 4;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .toolbar-chip {
+      pointer-events: auto;
+      color: var(--paper);
+      background: rgba(23, 23, 22, .6);
+      border: 1px solid rgba(251, 250, 246, .18);
+      backdrop-filter: blur(14px);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    #viewer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(232, 230, 220, .13), transparent 26%),
+        linear-gradient(145deg, #151515, #24231f 52%, #121212);
+    }
+
+    .viewer-empty {
+      position: absolute;
+      inset: auto 24px 86px 24px;
+      z-index: 3;
+      color: rgba(251, 250, 246, .78);
+      display: grid;
+      gap: 10px;
+      max-width: 420px;
+      pointer-events: none;
+    }
+    .viewer-empty strong { color: var(--paper); font-size: 28px; line-height: 1.05; font-family: "Hanken Grotesk", sans-serif; }
+    .viewer-empty span { line-height: 1.5; }
+
+    .result-actions {
+      position: absolute;
+      z-index: 5;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result-actions .btn { min-height: 40px; padding: 0 13px; font-size: 14px; }
+
+    .status {
+      position: absolute;
+      z-index: 6;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(23, 23, 22, .72);
+      color: var(--paper);
+      padding: 24px;
+      text-align: center;
+    }
+    .status-card { width: min(420px, 100%); display: grid; gap: 14px; }
+    .spinner {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto;
+      border-radius: 999px;
+      border: 4px solid rgba(251, 250, 246, .22);
+      border-top-color: var(--paper);
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress { height: 8px; background: rgba(251, 250, 246, .18); border-radius: 999px; overflow: hidden; }
+    .progress span { display: block; height: 100%; width: 14%; background: var(--clay); transition: width .4s ease; }
+
+    .section { padding: 16px 0 96px; }
+    .section-title { display: grid; gap: 10px; margin-bottom: 22px; }
+    .section-title h2 { font-size: clamp(30px, 4vw, 48px); line-height: 1.12; font-weight: 500; }
+    .section-title p { margin: 0; color: var(--muted); font-size: 19px; max-width: 720px; }
+
+    .steps, .pricing, .faq-grid { display: grid; gap: 18px; }
+    .steps { grid-template-columns: repeat(3, 1fr); }
+    .card {
+      background: rgba(255, 253, 248, .76);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: none;
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .card:hover { box-shadow: 0 8px 32px rgba(19, 19, 20, .08); transform: translateY(-2px); }
+    .card h3 { font-size: 24px; margin-bottom: 10px; }
+    .card p { color: var(--muted); margin: 0; line-height: 1.58; }
+    .step-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      font-size: 24px;
+      margin-bottom: 18px;
+    }
+
+    .showcase {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .sample-visual {
+      aspect-ratio: 16 / 10;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .sample-label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .86);
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .sample-art {
+      width: 70%;
+      height: 70%;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 30%, #65421f 0 5%, transparent 6%),
+        radial-gradient(circle at 46% 42%, #e0a52b 0 12%, transparent 13%),
+        radial-gradient(circle at 58% 42%, #db8c2d 0 11%, transparent 12%),
+        linear-gradient(145deg, #fff7dc, #d7b26b);
+      box-shadow: 0 16px 50px rgba(50, 35, 12, .22);
+      transform: rotate(-2deg);
+    }
+    .sample-3d {
+      width: 72%;
+      height: 72%;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(229, 226, 227, .95) 0 13%, transparent 14%),
+        radial-gradient(circle at 38% 42%, rgba(217, 119, 87, .78) 0 13%, transparent 14%),
+        radial-gradient(circle at 62% 42%, rgba(232, 230, 220, .95) 0 13%, transparent 14%),
+        radial-gradient(circle at 50% 58%, rgba(31, 30, 29, .82) 0 20%, transparent 21%);
+      filter: drop-shadow(0 30px 34px rgba(44, 33, 16, .22));
+      transform: perspective(600px) rotateX(58deg) rotateZ(-18deg);
+    }
+
+    .pricing { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+    .price-card { display: flex; flex-direction: column; gap: 18px; }
+    .price { font-size: 48px; font-family: "Hanken Grotesk", sans-serif; font-weight: 800; }
+    .price-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 11px; color: var(--muted); }
+    .price-card li::before { content: "✓"; color: var(--sage); font-weight: 900; margin-right: 8px; }
+    .popular { border: 2px solid var(--ink); background: var(--surface); transform: translateY(-8px); }
+
+    .faq-grid { grid-template-columns: 1fr 1fr; }
+    details { background: rgba(255, 253, 248, .72); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+    summary { cursor: pointer; font-weight: 800; font-size: 18px; }
+    details p { color: var(--muted); margin: 12px 0 0; line-height: 1.58; }
+
+    .final-cta {
+      margin: 22px 0 70px;
+      padding: 54px 22px;
+      text-align: center;
+      background: var(--sand);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .final-cta h2 { font-size: clamp(30px, 4vw, 48px); margin-bottom: 12px; }
+    .final-cta p { color: var(--muted); margin: 0 auto 24px; max-width: 620px; font-size: 19px; }
+
+    footer { border-top: 1px solid var(--line); padding: 34px 0; color: var(--muted); }
+    .footer-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(120%);
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 999px;
+      padding: 11px 16px;
+      z-index: 80;
+      transition: transform .22s ease;
+      box-shadow: var(--shadow);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 920px) {
+      .nav-links { display: none; }
+      .ghost-link { display: none; }
+      .hero { grid-template-columns: 1fr; padding-top: 36px; }
+      .stage-card { min-height: 520px; }
+      .steps, .pricing, .showcase, .faq-grid { grid-template-columns: 1fr; }
+      .popular { transform: none; }
+    }
+
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 24px, 1120px); }
+      .brand { font-size: 21px; }
+      .nav-actions .btn { padding: 0 12px; }
+      .hero { gap: 20px; }
+      .upload-panel { padding: 12px; }
+      .generation-actions { grid-template-columns: 1fr; }
+      .stage-card { min-height: 460px; border-radius: 10px; }
+      .result-actions { justify-content: stretch; }
+      .result-actions .btn { flex: 1 1 150px; }
+      h1 { font-size: 43px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="#top" aria-label="Atelier3D home">
+        <span class="brand-mark">3D</span>
+        <span>Atelier3D</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#product">Product</a>
+        <a href="#showcase">Showcase</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="ghost-link" href="#pricing">Sign in</a>
+        <a class="btn" href="#generator">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="wrap hero" id="product">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span> 1 free image to 3D model generation per day</span>
+        <div>
+          <h1>Image to 3D Model</h1>
+          <p>Upload a 2D image and turn it into a shareable interactive 3D model scene. Preview, rotate, export, and show the moment your flat image becomes spatial.</p>
+        </div>
+
+        <div class="upload-panel" id="generator">
+          <form id="generatorForm">
+            <label class="dropzone" id="dropzone">
+              <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp">
+              <span>
+                <span class="upload-icon">↑</span>
+                <strong>Drag & drop an image</strong>
+                <span>or click to browse files</span>
+                <span class="file-note">Use a clear image with one main subject. JPG, PNG, or WebP up to 10MB.</span>
+              </span>
+            </label>
+
+            <div class="preview-card" id="previewCard">
+              <img id="previewImage" alt="Uploaded image preview">
+              <div class="preview-meta">
+                <strong id="fileName">Selected image</strong>
+                <span id="fileInfo">Ready to generate</span>
+              </div>
+            </div>
+
+            <div class="generation-actions">
+              <button class="btn clay" id="generateBtn" type="submit">Generate 3D Model</button>
+              <button class="btn secondary" id="sampleBtn" type="button">Try Sample Image</button>
+            </div>
+
+            <label class="option-row">
+              <span>
+                <strong>Clean image before 3D</strong>
+                <span>Use AI to keep the main subject and remove visual background noise before Tripo generation.</span>
+              </span>
+              <span class="switch" aria-label="Clean image before 3D">
+                <input id="preprocessToggle" type="checkbox" checked>
+                <i></i>
+              </span>
+            </label>
+
+            <div class="turnstile-row" id="turnstileRow">
+              <div id="turnstileWidget"></div>
+            </div>
+            <div class="turnstile-note" id="turnstileNote">Cloudflare Turnstile will appear here after the site key is configured.</div>
+
+            <div class="free-note">
+              <span>Free exports include a small watermark and public share link.</span>
+              <span class="pill" id="quotaPill">1 free today</span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="stage-card" aria-label="Interactive 3D model preview">
+        <div id="viewer"></div>
+        <div class="stage-toolbar">
+          <span class="toolbar-chip">Interactive 3D Preview</span>
+          <span class="toolbar-chip" id="watermark">Made with Atelier3D</span>
+        </div>
+        <div class="viewer-empty" id="viewerEmpty">
+          <strong>Your image becomes a 3D scene here.</strong>
+          <span>Start with a sample or upload your own image. Drag to rotate, scroll to zoom, then export a shareable result.</span>
+        </div>
+        <div class="status" id="statusOverlay">
+          <div class="status-card">
+            <div class="spinner"></div>
+            <h2 id="statusTitle">Generating your 3D model...</h2>
+            <p id="statusText">The AI is reading the image, building geometry, and preparing a browser preview.</p>
+            <div class="progress"><span id="progressFill"></span></div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn soft" type="button" id="resetViewBtn">Reset View</button>
+          <button class="btn soft" type="button" id="shareBtn">Share Link</button>
+          <button class="btn soft" type="button" id="screenshotBtn">Export Screenshot</button>
+          <a class="btn" id="downloadBtn" href="#" download="atelier3d-model.glb" aria-disabled="true">Download Model</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap section">
+      <div class="section-title">
+        <h2>Convert Image to 3D Model Online</h2>
+        <p>Atelier3D is built for creators who want a fast AI image to 3D model generator without opening Blender, C4D, or a game engine.</p>
+      </div>
+      <div class="steps">
+        <article class="card">
+          <div class="step-icon">□</div>
+          <h3>1. Upload Image</h3>
+          <p>Start with a clear 2D image, product photo, character sketch, poster, painting, or illustration. Single-subject images usually produce the strongest 3D result.</p>
+        </article>
+        <article class="card">
+          <div class="step-icon">✦</div>
+          <h3>2. AI Generation</h3>
+          <p>The image-to-3D model pipeline analyzes shape, depth, and texture, then prepares a web-ready 3D asset for interactive preview.</p>
+        </article>
+        <article class="card">
+          <div class="step-icon">↗</div>
+          <h3>3. Export & Share</h3>
+          <p>Rotate the generated 3D model online, export a screenshot, copy a share link, or download the model when export is available.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap section" id="showcase">
+      <div class="section-title">
+        <h2>From Flat Image to Spatial Artwork</h2>
+        <p>The product is designed around the moment a flat picture gains depth, movement, and a shareable 3D presence.</p>
+      </div>
+      <div class="showcase">
+        <article class="card">
+          <div class="sample-visual">
+            <span class="sample-label">Original 2D</span>
+            <div class="sample-art" aria-hidden="true"></div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="sample-visual">
+            <span class="sample-label">Generated 3D</span>
+            <div class="sample-3d" aria-hidden="true"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap section" id="pricing">
+      <div class="section-title">
+        <h2>Simple Pricing for Creative Experiments</h2>
+        <p>Start free, share watermarked results, and upgrade when you need more generations, private links, or downloadable 3D files.</p>
+      </div>
+      <div class="pricing">
+        <article class="card price-card">
+          <h3>Free</h3>
+          <div><span class="price">$0</span> /mo</div>
+          <p>For trying the image to 3D model workflow.</p>
+          <a class="btn secondary" href="#generator">Get Started</a>
+          <ul>
+            <li>1 generation per day</li>
+            <li>Public share page</li>
+            <li>Watermarked exports</li>
+            <li>Standard queue</li>
+          </ul>
+        </article>
+        <article class="card price-card popular">
+          <h3>Creator</h3>
+          <div><span class="price">$19</span> /mo</div>
+          <p>For artists and creators who need more output.</p>
+          <a class="btn" href="#generator">Join Waitlist</a>
+          <ul>
+            <li>50 generations per month</li>
+            <li>No watermark</li>
+            <li>HD screenshots</li>
+            <li>Download model files</li>
+          </ul>
+        </article>
+        <article class="card price-card">
+          <h3>Pro</h3>
+          <div><span class="price">$49</span> /mo</div>
+          <p>For teams using AI 3D in production workflows.</p>
+          <a class="btn secondary" href="mailto:hello@example.com">Contact Sales</a>
+          <ul>
+            <li>Priority queue</li>
+            <li>Commercial usage</li>
+            <li>Batch generation</li>
+            <li>Advanced export formats</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap section" id="faq">
+      <div class="section-title">
+        <h2>Image to 3D Model FAQ</h2>
+        <p>Answers for people searching how to convert an image to a 3D model online.</p>
+      </div>
+      <div class="faq-grid">
+        <details open>
+          <summary>Can I turn any image into a 3D model?</summary>
+          <p>Most clear images can be tested, but the best results come from a single main subject with a visible silhouette and limited background clutter.</p>
+        </details>
+        <details>
+          <summary>What image works best for 2D image to 3D model generation?</summary>
+          <p>Product photos, sculptures, characters, toys, clean illustrations, and artwork with a clear subject usually work better than crowded scenes.</p>
+        </details>
+        <details>
+          <summary>Can I download the generated 3D model?</summary>
+          <p>The interface supports model downloads when the generation provider returns a GLB or compatible model URL. Free users can always export a watermarked screenshot.</p>
+        </details>
+        <details>
+          <summary>How long does image to 3D generation take?</summary>
+          <p>Real AI generation can take from tens of seconds to a few minutes depending on image complexity and queue load.</p>
+        </details>
+        <details>
+          <summary>Is this an AI image to 3D model generator?</summary>
+          <p>Yes. The production flow is designed to use an image-to-3D AI provider, then render the generated 3D model directly in the browser.</p>
+        </details>
+        <details>
+          <summary>Why did my image fail?</summary>
+          <p>Transparent objects, heavy blur, multiple overlapping subjects, or very low-resolution images can produce weak results. Try a clearer image with one subject.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="wrap final-cta">
+      <h2>Ready to turn an image into 3D?</h2>
+      <p>Use one free generation today and create a shareable 3D moment from your own image.</p>
+      <a class="btn clay" href="#generator">Start for free</a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <strong>Atelier3D</strong>
+      <span>© 2026 Atelier3D. Built for AI image to 3D model creation.</span>
+      <div class="footer-links">
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="mailto:hello@example.com">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from "three";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+    const els = {
+      form: document.getElementById("generatorForm"),
+      dropzone: document.getElementById("dropzone"),
+      input: document.getElementById("imageInput"),
+      previewCard: document.getElementById("previewCard"),
+      previewImage: document.getElementById("previewImage"),
+      fileName: document.getElementById("fileName"),
+      fileInfo: document.getElementById("fileInfo"),
+      generateBtn: document.getElementById("generateBtn"),
+      sampleBtn: document.getElementById("sampleBtn"),
+      viewer: document.getElementById("viewer"),
+      viewerEmpty: document.getElementById("viewerEmpty"),
+      statusOverlay: document.getElementById("statusOverlay"),
+      statusTitle: document.getElementById("statusTitle"),
+      statusText: document.getElementById("statusText"),
+      progressFill: document.getElementById("progressFill"),
+      resetViewBtn: document.getElementById("resetViewBtn"),
+      shareBtn: document.getElementById("shareBtn"),
+      screenshotBtn: document.getElementById("screenshotBtn"),
+      downloadBtn: document.getElementById("downloadBtn"),
+      preprocessToggle: document.getElementById("preprocessToggle"),
+      toast: document.getElementById("toast")
+    };
+    els.turnstileRow = document.getElementById("turnstileRow");
+    els.turnstileWidget = document.getElementById("turnstileWidget");
+    els.turnstileNote = document.getElementById("turnstileNote");
+
+    const state = {
+      file: null,
+      dataUrl: null,
+      currentModel: null,
+      distance: 4.6,
+      targetRotation: { x: -0.1, y: 0.35 },
+      isDragging: false,
+      lastPointer: { x: 0, y: 0 },
+      modelUrl: "",
+      processedDataUrl: "",
+      processedImageUrl: "",
+      turnstileToken: "",
+      turnstileEnabled: false,
+      turnstileWidgetId: null
+    };
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0, 0.2, state.distance);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    els.viewer.appendChild(renderer.domElement);
+
+    const ambient = new THREE.HemisphereLight(0xfff8ec, 0x3d3325, 2.2);
+    scene.add(ambient);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+    keyLight.position.set(4, 5, 5);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xd9c49b, 1.1);
+    fillLight.position.set(-4, 1, 3);
+    scene.add(fillLight);
+
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(2.4, 64),
+      new THREE.MeshBasicMaterial({ color: 0xf0d795, transparent: true, opacity: 0.08 })
+    );
+    floor.position.y = -1.35;
+    floor.rotation.x = -Math.PI / 2;
+    scene.add(floor);
+
+    createSampleSculpture();
+    resize();
+    animate();
+    initTurnstile();
+
+    function createSampleSculpture(textureUrl = "") {
+      clearModel();
+      const group = new THREE.Group();
+      const texture = textureUrl ? new THREE.TextureLoader().load(textureUrl) : null;
+      if (texture) texture.colorSpace = THREE.SRGBColorSpace;
+
+      const stone = new THREE.MeshStandardMaterial({
+        color: 0xe5e2dc,
+        roughness: 0.58,
+        metalness: 0.02,
+        map: texture || null
+      });
+      const ink = new THREE.MeshStandardMaterial({ color: 0x2f312e, roughness: 0.7 });
+      const clay = new THREE.MeshStandardMaterial({ color: 0xd97757, roughness: 0.76, transparent: true, opacity: 0.88 });
+
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 1.05, 1.45, 48), stone);
+      torso.position.y = -0.64;
+      torso.scale.z = 0.72;
+      group.add(torso);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.72, 48, 32), stone);
+      head.position.y = 0.46;
+      head.scale.set(0.86, 1.06, 0.82);
+      group.add(head);
+
+      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.28, 24), stone);
+      nose.position.set(0, 0.47, 0.63);
+      nose.rotation.x = Math.PI / 2;
+      group.add(nose);
+
+      const eyeGeo = new THREE.BoxGeometry(0.16, 0.045, 0.035);
+      const leftEye = new THREE.Mesh(eyeGeo, ink);
+      leftEye.position.set(-0.25, 0.58, 0.61);
+      leftEye.rotation.z = 0.08;
+      group.add(leftEye);
+
+      const rightEye = new THREE.Mesh(eyeGeo, ink);
+      rightEye.position.set(0.25, 0.58, 0.61);
+      rightEye.rotation.z = -0.08;
+      group.add(rightEye);
+
+      const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 1.36, 0.32, 64), stone);
+      plinth.position.y = -1.55;
+      group.add(plinth);
+
+      const ribbon = new THREE.Mesh(new THREE.TorusGeometry(1.34, 0.012, 8, 96), clay);
+      ribbon.rotation.x = Math.PI / 2.65;
+      ribbon.position.y = -0.02;
+      group.add(ribbon);
+
+      const wire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.32, 2)),
+        new THREE.LineBasicMaterial({ color: 0xf9f8f4, transparent: true, opacity: 0.14 })
+      );
+      wire.scale.set(1.05, 1.16, 1.05);
+      group.add(wire);
+
+      group.rotation.copy(new THREE.Euler(state.targetRotation.x, state.targetRotation.y, 0));
+      state.currentModel = group;
+      scene.add(group);
+    }
+
+    function clearModel() {
+      if (!state.currentModel) return;
+      scene.remove(state.currentModel);
+      state.currentModel.traverse((object) => {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          if (Array.isArray(object.material)) object.material.forEach((m) => m.dispose());
+          else object.material.dispose();
+        }
+      });
+      state.currentModel = null;
+    }
+
+    function resize() {
+      const rect = els.viewer.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (state.currentModel && !state.isDragging) {
+        state.currentModel.rotation.y += 0.004;
+      }
+      renderer.render(scene, camera);
+    }
+
+    async function loadModelFromUrl(url) {
+      const loader = new GLTFLoader();
+      const gltf = await loader.loadAsync(url);
+      clearModel();
+      const model = gltf.scene;
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+      model.scale.multiplyScalar(2.4 / maxAxis);
+      model.position.sub(center.multiplyScalar(2.4 / maxAxis));
+      state.currentModel = model;
+      scene.add(model);
+      state.modelUrl = url;
+      els.downloadBtn.href = url;
+      els.downloadBtn.setAttribute("aria-disabled", "false");
+    }
+
+    function setStatus(visible, title = "", text = "", progress = 0) {
+      els.statusOverlay.style.display = visible ? "grid" : "none";
+      els.statusTitle.textContent = title;
+      els.statusText.textContent = text;
+      els.progressFill.style.width = `${progress}%`;
+    }
+
+    function toast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      setTimeout(() => els.toast.classList.remove("show"), 2400);
+    }
+
+    function validateFile(file) {
+      if (!file) return "Choose an image first.";
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return "Use JPG, PNG, or WebP.";
+      if (file.size > 10 * 1024 * 1024) return "Use an image smaller than 10MB.";
+      return "";
+    }
+
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function selectFile(file) {
+      const error = validateFile(file);
+      if (error) {
+        toast(error);
+        return;
+      }
+      state.file = file;
+      state.dataUrl = await readFile(file);
+      els.previewImage.src = state.dataUrl;
+      els.fileName.textContent = file.name;
+      els.fileInfo.textContent = `${Math.round(file.size / 1024)} KB · ready to generate`;
+      els.previewCard.style.display = "flex";
+      createSampleSculpture(state.dataUrl);
+      els.viewerEmpty.style.display = "none";
+      toast("Image loaded. Generate when ready.");
+    }
+
+    async function generateModel() {
+      if (!state.dataUrl) {
+        toast("Upload an image or try the sample first.");
+        return;
+      }
+
+      els.generateBtn.disabled = true;
+      setStatus(true, "Generating your 3D model...", "Preparing the image and contacting the AI generation service.", 18);
+
+      let progress = 18;
+      const progressTimer = setInterval(() => {
+        progress = Math.min(progress + Math.random() * 12, 86);
+        els.progressFill.style.width = `${progress}%`;
+      }, 700);
+
+      try {
+        let imageFor3d = state.dataUrl;
+        if (els.preprocessToggle.checked) {
+          setStatus(true, "Cleaning image for 3D...", "Keeping the main subject and simplifying the background before 3D generation.", 12);
+          const preprocess = await preprocessImage();
+          if (preprocess.image) {
+            imageFor3d = preprocess.image;
+            state.processedImageUrl = preprocess.imageUrl || "";
+            state.processedDataUrl = preprocess.image.startsWith("data:") ? preprocess.image : "";
+            if (state.processedDataUrl) createSampleSculpture(state.processedDataUrl);
+            toast("Image cleaned for 3D generation.");
+          } else {
+            toast(preprocess.message || "Preprocess skipped. Continuing with original image.");
+          }
+        }
+
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: imageFor3d,
+            fileName: state.file?.name || "sample.png",
+            mimeType: state.file?.type || "image/png",
+            turnstileToken: state.turnstileToken
+          })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (response.ok && payload.taskId) {
+          await pollTask(payload.taskId);
+        } else {
+          await waitForMock();
+          createSampleSculpture(state.dataUrl);
+          els.downloadBtn.removeAttribute("href");
+          els.downloadBtn.setAttribute("aria-disabled", "true");
+          toast(payload.message || "Demo preview generated. Add TRIPO_API_KEY for real model output.");
+        }
+      } catch (error) {
+        await waitForMock();
+        createSampleSculpture(state.dataUrl);
+        toast("Demo preview generated locally. API is not configured yet.");
+      } finally {
+        clearInterval(progressTimer);
+        setStatus(false);
+        els.generateBtn.disabled = false;
+        els.viewerEmpty.style.display = "none";
+        resetTurnstile();
+      }
+    }
+
+    async function preprocessImage() {
+      try {
+        const response = await fetch("/api/preprocess", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: state.dataUrl,
+            prompt: "Keep only the main subject from this image for 3D model generation. Remove or simplify the background. Preserve the subject shape, colors, texture, and important visual details. Use a clean plain light background. Do not add new objects."
+          })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) return { message: payload.message || "Preprocess failed." };
+        return payload;
+      } catch (error) {
+        return { message: "Preprocess service is unavailable." };
+      }
+    }
+
+    async function pollTask(taskId) {
+      for (let i = 0; i < 90; i += 1) {
+        setStatus(true, "Generating your 3D model...", `AI task ${taskId} is running. This can take 30-90 seconds.`, Math.min(24 + i, 94));
+        const response = await fetch(`/api/status?taskId=${encodeURIComponent(taskId)}`);
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || "Status check failed.");
+        if (payload.status === "success" && payload.modelUrl) {
+          setStatus(true, "Loading interactive preview...", "The model is ready. Loading it into the browser viewer.", 98);
+          await loadModelFromUrl(payload.modelUrl);
+          toast("3D model loaded.");
+          return;
+        }
+        if (["failed", "cancelled", "banned", "unknown"].includes(payload.status)) {
+          throw new Error(payload.message || "The generation task failed.");
+        }
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+      }
+      throw new Error("Generation timed out.");
+    }
+
+    function waitForMock() {
+      return new Promise((resolve) => setTimeout(resolve, 2200));
+    }
+
+    function createSampleFile() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 900;
+      canvas.height = 900;
+      const ctx = canvas.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 0, 900, 900);
+      gradient.addColorStop(0, "#fff2c2");
+      gradient.addColorStop(1, "#c96b43");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 900, 900);
+      ctx.fillStyle = "#273f2a";
+      ctx.beginPath();
+      ctx.ellipse(450, 520, 90, 260, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      for (let i = 0; i < 14; i += 1) {
+        const angle = (i / 14) * Math.PI * 2;
+        ctx.save();
+        ctx.translate(450 + Math.cos(angle) * 130, 380 + Math.sin(angle) * 130);
+        ctx.rotate(angle);
+        ctx.fillStyle = i % 2 ? "#e3a32c" : "#c96b43";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 60, 128, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.fillStyle = "#5a3418";
+      ctx.beginPath();
+      ctx.arc(450, 380, 92, 0, Math.PI * 2);
+      ctx.fill();
+      state.dataUrl = canvas.toDataURL("image/png");
+      state.file = null;
+      els.previewImage.src = state.dataUrl;
+      els.fileName.textContent = "sample-sunflower-art.png";
+      els.fileInfo.textContent = "Generated sample · ready to generate";
+      els.previewCard.style.display = "flex";
+      createSampleSculpture(state.dataUrl);
+      els.viewerEmpty.style.display = "none";
+      toast("Sample image loaded.");
+    }
+
+    function exportScreenshot() {
+      renderer.render(scene, camera);
+      const source = renderer.domElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = source.width;
+      canvas.height = source.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(source, 0, 0);
+      ctx.fillStyle = "rgba(251, 250, 246, 0.88)";
+      ctx.fillRect(canvas.width - 360, canvas.height - 58, 330, 34);
+      ctx.fillStyle = "#171716";
+      ctx.font = "700 22px sans-serif";
+      ctx.fillText("Made with Atelier3D", canvas.width - 342, canvas.height - 35);
+      const link = document.createElement("a");
+      link.download = "image-to-3d-model-atelier3d.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast("Screenshot exported with watermark.");
+    }
+
+    async function shareResult() {
+      const url = window.location.href.split("#")[0] + "#generator";
+      if (navigator.share) {
+        await navigator.share({
+          title: "Image to 3D Model",
+          text: "I turned a 2D image into an interactive 3D model scene.",
+          url
+        }).catch(() => {});
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast("Share link copied.");
+      }
+    }
+
+    function resetView() {
+      camera.position.set(0, 0.2, state.distance);
+      if (state.currentModel) state.currentModel.rotation.set(-0.1, 0.35, 0);
+      toast("View reset.");
+    }
+
+    async function initTurnstile() {
+      try {
+        const response = await fetch("/api/config");
+        const config = await response.json();
+        if (!config.turnstileSiteKey) {
+          els.turnstileNote.style.display = "block";
+          return;
+        }
+        state.turnstileEnabled = true;
+        els.turnstileRow.style.display = "block";
+        const render = () => {
+          if (!window.turnstile || state.turnstileWidgetId !== null) return;
+          state.turnstileWidgetId = window.turnstile.render(els.turnstileWidget, {
+            sitekey: config.turnstileSiteKey,
+            callback: (token) => { state.turnstileToken = token; },
+            "expired-callback": () => { state.turnstileToken = ""; },
+            "error-callback": () => { state.turnstileToken = ""; }
+          });
+        };
+        if (window.turnstile) render();
+        else window.addEventListener("load", render, { once: true });
+      } catch {
+        els.turnstileNote.style.display = "block";
+      }
+    }
+
+    function resetTurnstile() {
+      state.turnstileToken = "";
+      if (state.turnstileWidgetId !== null && window.turnstile) {
+        window.turnstile.reset(state.turnstileWidgetId);
+      }
+    }
+
+    els.input.addEventListener("change", () => selectFile(els.input.files[0]));
+    els.form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      generateModel();
+    });
+    els.sampleBtn.addEventListener("click", createSampleFile);
+    els.screenshotBtn.addEventListener("click", exportScreenshot);
+    els.shareBtn.addEventListener("click", shareResult);
+    els.resetViewBtn.addEventListener("click", resetView);
+
+    ["dragenter", "dragover"].forEach((name) => {
+      els.dropzone.addEventListener(name, (event) => {
+        event.preventDefault();
+        els.dropzone.classList.add("is-dragging");
+      });
+    });
+    ["dragleave", "drop"].forEach((name) => {
+      els.dropzone.addEventListener(name, (event) => {
+        event.preventDefault();
+        els.dropzone.classList.remove("is-dragging");
+      });
+    });
+    els.dropzone.addEventListener("drop", (event) => selectFile(event.dataTransfer.files[0]));
+
+    els.viewer.addEventListener("pointerdown", (event) => {
+      state.isDragging = true;
+      state.lastPointer.x = event.clientX;
+      state.lastPointer.y = event.clientY;
+      els.viewer.setPointerCapture(event.pointerId);
+    });
+    els.viewer.addEventListener("pointermove", (event) => {
+      if (!state.isDragging || !state.currentModel) return;
+      const dx = event.clientX - state.lastPointer.x;
+      const dy = event.clientY - state.lastPointer.y;
+      state.currentModel.rotation.y += dx * 0.008;
+      state.currentModel.rotation.x += dy * 0.008;
+      state.lastPointer.x = event.clientX;
+      state.lastPointer.y = event.clientY;
+    });
+    els.viewer.addEventListener("pointerup", () => { state.isDragging = false; });
+    els.viewer.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      state.distance = Math.min(8, Math.max(2.2, state.distance + event.deltaY * 0.004));
+      camera.position.z = state.distance;
+    }, { passive: false });
+
+    window.addEventListener("resize", resize);
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Atelier3D Image to 3D Model",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Web",
+      "description": "Upload a 2D image and turn it into an interactive 3D model online.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
+</body>
+</html>
