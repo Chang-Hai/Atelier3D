@@ -12,6 +12,7 @@ module.exports = function handler(req, res) {
 
   return send(res, 200, {
     turnstileSiteKey: process.env.TURNSTILE_SITE_KEY || "",
-    preprocessEnabled: Boolean(process.env.ARK_API_KEY)
+    preprocessEnabled: Boolean(process.env.ARK_API_KEY),
+    googleAuthEnabled: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
   });
 };

@@ -1,4 +1,5 @@
 const ARK_IMAGE_URL = process.env.ARK_IMAGE_URL || "https://ark.cn-beijing.volces.com/api/v3/images/generations";
+const { requireAuth } = require("../lib/auth");
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -28,6 +29,9 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return send(res, 405, { message: "Method not allowed." });
   }
+
+  const session = requireAuth(req, res);
+  if (!session) return;
 
   const apiKey = process.env.ARK_API_KEY;
   if (!apiKey) {

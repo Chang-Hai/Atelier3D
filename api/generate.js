@@ -1,4 +1,5 @@
-const TRIPO_BASE_URL = process.env.TRIPO_BASE_URL || "https://openapi.tripo3d.ai/v3";
+const MESHY_BASE_URL = process.env.MESHY_BASE_URL || "https://api.meshy.ai/openapi/v1";
+const { requireAuth } = require("../lib/auth");
 const dailyUsage = globalThis.__atelierDailyUsage || new Map();
 globalThis.__atelierDailyUsage = dailyUsage;
 
@@ -33,12 +34,7 @@ async function readBody(req) {
 }
 
 function findTaskId(taskPayload) {
-  return (
-    taskPayload?.data?.task_id ||
-    taskPayload?.data?.id ||
-    taskPayload?.task_id ||
-    taskPayload?.id
-  );
+  return taskPayload?.result || taskPayload?.id || taskPayload?.task_id || taskPayload?.data?.id;
 }
 
 async function verifyTurnstile(token, req) {
@@ -62,6 +58,8 @@ async function verifyTurnstile(token, req) {
 }
 
 function getClientId(req) {
+  const session = req.session;
+  if (session?.user?.id) return `user:${session.user.id}`;
   return (
     req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
     req.headers["x-real-ip"] ||
@@ -94,11 +92,15 @@ module.exports = async function handler(req, res) {
     return send(res, 405, { message: "Method not allowed." });
   }
 
-  const apiKey = process.env.TRIPO_API_KEY;
+  const session = requireAuth(req, res);
+  if (!session) return;
+  req.session = session;
+
+  const apiKey = process.env.MESHY_API_KEY;
   if (!apiKey) {
     return send(res, 200, {
       mode: "demo",
-      message: "TRIPO_API_KEY is not configured. The frontend will use local demo preview."
+      message: "MESHY_API_KEY is not configured. The frontend will use local demo preview."
     });
   }
 
@@ -115,55 +117,26 @@ module.exports = async function handler(req, res) {
     const quota = checkDailyLimit(req);
     if (!quota.ok) return send(res, 429, quota);
 
-    let tripoInput = body.image;
-    if (parsed) {
-      const fileName = body.fileName || `image-to-3d-input.${getExtension(body.fileName, parsed.mimeType)}`;
-      const formData = new FormData();
-      const blob = new Blob([parsed.buffer], { type: body.mimeType || parsed.mimeType });
-      formData.append("file", blob, fileName);
-
-      const uploadResponse = await fetch(`${TRIPO_BASE_URL}/files`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}` },
-        body: formData
-      });
-      const uploadPayload = await uploadResponse.json().catch(() => ({}));
-      if (!uploadResponse.ok || uploadPayload.code !== 0) {
-        return send(res, uploadResponse.status || 502, {
-          message: uploadPayload.message || "Tripo file upload failed.",
-          suggestion: uploadPayload.suggestion,
-          details: uploadPayload
-        });
-      }
-
-      tripoInput = uploadPayload?.data?.file_token;
-      if (!tripoInput) {
-        return send(res, 502, {
-          message: "Tripo file upload did not return data.file_token.",
-          details: uploadPayload
-        });
-      }
-    }
-
-    const taskResponse = await fetch(`${TRIPO_BASE_URL}/generation/image-to-model`, {
+    const taskResponse = await fetch(`${MESHY_BASE_URL}/image-to-3d`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        input: tripoInput,
-        model: process.env.TRIPO_MODEL || "tripo-p1",
-        face_limit: 50000,
-        texture: true,
-        pbr: true
+        image_url: body.image,
+        ai_model: process.env.MESHY_AI_MODEL || "meshy-5",
+        topology: process.env.MESHY_TOPOLOGY || "triangle",
+        target_polycount: Number(process.env.MESHY_TARGET_POLYCOUNT || 30000),
+        should_remesh: process.env.MESHY_SHOULD_REMESH !== "false",
+        should_texture: process.env.MESHY_SHOULD_TEXTURE !== "false",
+        enable_pbr: process.env.MESHY_ENABLE_PBR !== "false"
       })
     });
     const taskPayload = await taskResponse.json().catch(() => ({}));
-    if (!taskResponse.ok || taskPayload.code !== 0) {
-      return send(res, taskResponse.ok ? 502 : taskResponse.status, {
-        message: taskPayload.message || "Tripo task creation failed.",
-        suggestion: taskPayload.suggestion,
+    if (!taskResponse.ok) {
+      return send(res, taskResponse.status || 502, {
+        message: taskPayload.message || taskPayload.error || "Meshy task creation failed.",
         details: taskPayload
       });
     }
@@ -171,7 +144,7 @@ module.exports = async function handler(req, res) {
     const taskId = findTaskId(taskPayload);
     if (!taskId) {
       return send(res, 502, {
-        message: "Tripo task response did not include a task id.",
+        message: "Meshy task response did not include a task id.",
         details: taskPayload
       });
     }
@@ -184,12 +157,3 @@ module.exports = async function handler(req, res) {
     });
   }
 };
-
-function getExtension(fileName, mimeType) {
-  const fromName = String(fileName || "").split(".").pop().toLowerCase();
-  if (["jpg", "jpeg", "png", "webp", "bmp", "tiff"].includes(fromName)) return fromName;
-  if (mimeType === "image/jpeg") return "jpg";
-  if (mimeType === "image/png") return "png";
-  if (mimeType === "image/webp") return "webp";
-  return "png";
-}
