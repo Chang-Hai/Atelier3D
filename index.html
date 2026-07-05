@@ -542,6 +542,149 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
+    .generation-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 34%, rgba(255, 255, 255, .08), transparent 30%),
+        rgba(17, 18, 19, .78);
+      backdrop-filter: blur(18px);
+      color: #f9f8f4;
+    }
+
+    .generation-overlay.is-visible {
+      display: grid;
+    }
+
+    .generation-card {
+      width: min(520px, 100%);
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 14px;
+      background: rgba(17, 18, 19, .72);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .44);
+      padding: 28px;
+      text-align: left;
+    }
+
+    .generation-kicker {
+      margin: 0 0 16px;
+      color: rgba(249, 248, 244, .66);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .generation-card h2 {
+      color: #ffffff;
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .generation-card p {
+      margin: 0;
+      color: rgba(249, 248, 244, .74);
+      line-height: 1.55;
+    }
+
+    .generation-preview {
+      height: 92px;
+      margin: 22px 0;
+      border-radius: 10px;
+      background:
+        radial-gradient(ellipse at 52% 56%, rgba(249, 248, 244, .78), transparent 18%),
+        radial-gradient(ellipse at 50% 58%, rgba(249, 248, 244, .38), transparent 34%),
+        linear-gradient(90deg, transparent, rgba(249, 248, 244, .1), transparent);
+      filter: blur(.2px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .generation-preview::before,
+    .generation-preview::after {
+      content: "";
+      position: absolute;
+      inset: 22px auto auto 50%;
+      width: 118px;
+      height: 48px;
+      border: 1px solid rgba(249, 248, 244, .42);
+      transform: translateX(-50%) rotate(-8deg);
+      animation: inkDrift 2.8s ease-in-out infinite alternate;
+    }
+
+    .generation-preview::after {
+      width: 86px;
+      height: 62px;
+      transform: translateX(-10%) rotate(18deg);
+      animation-delay: -.8s;
+    }
+
+    @keyframes inkDrift {
+      from { opacity: .42; filter: blur(0); }
+      to { opacity: .82; filter: blur(1.6px); }
+    }
+
+    .generation-progress {
+      height: 8px;
+      margin: 18px 0 16px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(249, 248, 244, .14);
+    }
+
+    .generation-progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #f9f8f4, #d97757);
+      transition: width .35s ease;
+    }
+
+    .generation-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .generation-step {
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 8px;
+      padding: 9px 8px;
+      color: rgba(249, 248, 244, .54);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .generation-step.is-active {
+      border-color: rgba(249, 248, 244, .68);
+      color: #ffffff;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    @media (max-width: 560px) {
+      .generation-card {
+        padding: 22px;
+      }
+
+      .generation-card h2 {
+        font-size: 24px;
+      }
+
+      .generation-steps {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 920px) {
       .nav-links { display: none; }
       .ghost-link:not(.auth-link) { display: none; }
@@ -1667,6 +1810,22 @@
       </div>
     </div>
   </footer>
+
+  <div class="generation-overlay" id="generationOverlay" role="status" aria-live="polite" aria-hidden="true">
+    <div class="generation-card">
+      <p class="generation-kicker">AI ART TO 3D IN PROGRESS</p>
+      <h2 id="generationTitle">Preparing your artwork...</h2>
+      <p id="generationText">Reading brush texture, depth cues, and visual atmosphere before building the spatial model.</p>
+      <div class="generation-preview" aria-hidden="true"></div>
+      <div class="generation-progress"><span id="generationProgress"></span></div>
+      <div class="generation-steps" aria-hidden="true">
+        <span class="generation-step is-active" data-step="clean">Clean artwork</span>
+        <span class="generation-step" data-step="model">Build 3D art</span>
+        <span class="generation-step" data-step="preview">Load preview</span>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="importmap">
@@ -1698,6 +1857,11 @@
       statusTitle: document.getElementById("statusTitle"),
       statusText: document.getElementById("statusText"),
       progressFill: document.getElementById("progressFill"),
+      generationOverlay: document.getElementById("generationOverlay"),
+      generationTitle: document.getElementById("generationTitle"),
+      generationText: document.getElementById("generationText"),
+      generationProgress: document.getElementById("generationProgress"),
+      generationSteps: Array.from(document.querySelectorAll(".generation-step")),
       resetViewBtn: document.getElementById("resetViewBtn"),
       shareBtn: document.getElementById("shareBtn"),
       screenshotBtn: document.getElementById("screenshotBtn"),
@@ -1878,6 +2042,15 @@
       els.statusTitle.textContent = title;
       els.statusText.textContent = text;
       els.progressFill.style.width = `${progress}%`;
+      els.generationOverlay.classList.toggle("is-visible", visible);
+      els.generationOverlay.setAttribute("aria-hidden", visible ? "false" : "true");
+      els.generationTitle.textContent = title || "Preparing your artwork...";
+      els.generationText.textContent = text || "Reading brush texture, depth cues, and visual atmosphere before building the spatial model.";
+      els.generationProgress.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+      const activeStep = progress < 28 ? "clean" : progress < 96 ? "model" : "preview";
+      els.generationSteps.forEach((step) => {
+        step.classList.toggle("is-active", step.dataset.step === activeStep);
+      });
     }
 
     function toast(message) {
@@ -1971,7 +2144,7 @@
 
       els.generateBtn.disabled = true;
       els.generateBtn.textContent = "Generating...";
-      setStatus(true, "Generating your 3D art model...", "Preparing the artwork and contacting the AI generation service.", 18);
+      setStatus(true, "Preparing your artwork...", "Reading the subject, brush texture, and composition before creating a spatial 3D art model.", 18);
 
       let progress = 18;
       const progressTimer = setInterval(() => {
@@ -1982,7 +2155,7 @@
       try {
         let imageFor3d = state.dataUrl;
         if (els.preprocessToggle.checked) {
-          setStatus(true, "Cleaning artwork for 3D...", "Keeping the main subject and preserving brush texture before 3D generation.", 12);
+          setStatus(true, "Cleaning artwork for 3D...", "Removing background noise while preserving the subject, brush texture, and atmosphere.", 12);
           const preprocess = await preprocessImage();
           if (preprocess.image) {
             imageFor3d = preprocess.image;
@@ -2058,7 +2231,7 @@
 
     async function pollTask(taskId) {
       for (let i = 0; i < 90; i += 1) {
-        setStatus(true, "Generating your 3D model...", `AI task ${taskId} is running. This can take 30-90 seconds.`, Math.min(24 + i, 94));
+        setStatus(true, "Building your spatial art model...", `AI task ${taskId} is shaping depth, texture, and editable 3D form. This can take 30-90 seconds.`, Math.min(24 + i, 94));
         const response = await fetch(`/api/status?taskId=${encodeURIComponent(taskId)}`);
         const payload = await response.json();
         if (response.status === 401) {
@@ -2067,7 +2240,7 @@
         }
         if (!response.ok) throw new Error(payload.message || "Status check failed.");
         if (payload.status === "success" && payload.modelUrl) {
-          setStatus(true, "Loading interactive preview...", "The model is ready. Loading it into the browser viewer.", 98);
+          setStatus(true, "Loading interactive preview...", "The 3D art model is ready. Preparing the browser preview and export controls.", 98);
           await loadModelFromUrl(payload.modelUrl);
           toast("3D model loaded.");
           return;
