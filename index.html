@@ -1610,7 +1610,7 @@
             </div>
 
             <div class="generation-actions">
-              <button class="btn clay" id="generateBtn" type="submit">Generate Free</button>
+              <button class="btn clay" id="generateBtn" type="button">Generate Free</button>
               <button class="btn secondary" id="sampleBtn" type="button">Try sample image</button>
             </div>
 
@@ -2374,6 +2374,13 @@
     els.input.addEventListener("change", () => selectFile(els.input.files[0]));
     els.form.addEventListener("submit", (event) => {
       event.preventDefault();
+      generateModel();
+    });
+    els.generateBtn.addEventListener("click", () => {
+      if (!state.dataUrl) {
+        els.input.click();
+        return;
+      }
       generateModel();
     });
     els.sampleBtn.addEventListener("click", createSampleFile);
