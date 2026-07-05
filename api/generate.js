@@ -69,7 +69,7 @@ function getClientId(req) {
 }
 
 function checkDailyLimit(req) {
-  const limit = Number(process.env.FREE_DAILY_LIMIT || 1);
+  const limit = Number(process.env.FREE_DAILY_LIMIT || 10);
   if (!Number.isFinite(limit) || limit <= 0) return { ok: true };
 
   const date = new Date().toISOString().slice(0, 10);

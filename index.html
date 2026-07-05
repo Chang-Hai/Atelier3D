@@ -815,6 +815,16 @@
       margin: 0 0 16px;
     }
 
+    .upload-panel.has-file .file-note {
+      color: rgba(255, 255, 255, .7);
+    }
+
+    .upload-panel.has-file .dropzone {
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, .14);
+      margin-bottom: 12px;
+    }
+
     .generation-actions {
       display: flex;
       justify-content: center;
@@ -844,9 +854,56 @@
     .option-row,
     .turnstile-row,
     .turnstile-note,
-    .free-note,
-    .preview-card {
+    .free-note {
       display: none !important;
+    }
+
+    .preview-card {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 14px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      background: rgba(255, 255, 255, .08);
+      color: #ffffff;
+      text-align: left;
+    }
+
+    .preview-card img {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 auto;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
+    .preview-meta {
+      min-width: 0;
+    }
+
+    .preview-meta strong,
+    .preview-meta span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-meta strong {
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .preview-meta span {
+      color: rgba(255, 255, 255, .68);
+      font-size: 12px;
+    }
+
+    .upload-panel.has-file .preview-card {
+      display: flex;
     }
 
     .hero .stage-card {
@@ -1626,6 +1683,7 @@
 
     const els = {
       form: document.getElementById("generatorForm"),
+      uploadPanel: document.getElementById("generator"),
       dropzone: document.getElementById("dropzone"),
       input: document.getElementById("imageInput"),
       previewCard: document.getElementById("previewCard"),
@@ -1893,11 +1951,12 @@
       state.dataUrl = await readFile(file);
       els.previewImage.src = state.dataUrl;
       els.fileName.textContent = file.name;
-      els.fileInfo.textContent = `${Math.round(file.size / 1024)} KB - ready to generate`;
-      els.previewCard.style.display = "flex";
+      els.fileInfo.textContent = `${Math.round(file.size / 1024)} KB - artwork ready for 3D`;
+      els.uploadPanel.classList.add("has-file");
+      els.generateBtn.textContent = "Generate 3D Art";
       createSampleSculpture(state.dataUrl);
       els.viewerEmpty.style.display = "none";
-      toast("Image loaded. Generate when ready.");
+      toast("Artwork loaded. Generate your free 3D art model when ready.");
     }
 
     async function generateModel() {
@@ -1911,7 +1970,8 @@
       }
 
       els.generateBtn.disabled = true;
-      setStatus(true, "Generating your 3D model...", "Preparing the image and contacting the AI generation service.", 18);
+      els.generateBtn.textContent = "Generating...";
+      setStatus(true, "Generating your 3D art model...", "Preparing the artwork and contacting the AI generation service.", 18);
 
       let progress = 18;
       const progressTimer = setInterval(() => {
@@ -1922,14 +1982,14 @@
       try {
         let imageFor3d = state.dataUrl;
         if (els.preprocessToggle.checked) {
-          setStatus(true, "Cleaning image for 3D...", "Keeping the main subject and simplifying the background before 3D generation.", 12);
+          setStatus(true, "Cleaning artwork for 3D...", "Keeping the main subject and preserving brush texture before 3D generation.", 12);
           const preprocess = await preprocessImage();
           if (preprocess.image) {
             imageFor3d = preprocess.image;
             state.processedImageUrl = preprocess.imageUrl || "";
             state.processedDataUrl = preprocess.image.startsWith("data:") ? preprocess.image : "";
             if (state.processedDataUrl) createSampleSculpture(state.processedDataUrl);
-            toast("Image cleaned for 3D generation.");
+            toast("Artwork cleaned for 3D generation.");
           } else {
             toast(preprocess.message || "Preprocess skipped. Continuing with original image.");
           }
@@ -1968,6 +2028,7 @@
         clearInterval(progressTimer);
         setStatus(false);
         els.generateBtn.disabled = false;
+        els.generateBtn.textContent = state.dataUrl ? "Generate 3D Art" : "Generate Free";
         els.viewerEmpty.style.display = "none";
         resetTurnstile();
       }
@@ -2056,11 +2117,12 @@
       state.file = null;
       els.previewImage.src = state.dataUrl;
       els.fileName.textContent = "sample-sunflower-art.png";
-      els.fileInfo.textContent = "Generated sample - ready to generate";
-      els.previewCard.style.display = "flex";
+      els.fileInfo.textContent = "Generated sample - artwork ready for 3D";
+      els.uploadPanel.classList.add("has-file");
+      els.generateBtn.textContent = "Generate 3D Art";
       createSampleSculpture(state.dataUrl);
       els.viewerEmpty.style.display = "none";
-      toast("Sample image loaded.");
+      toast("Sample artwork loaded.");
     }
 
     function exportScreenshot() {
