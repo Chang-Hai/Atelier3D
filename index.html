@@ -10,6 +10,9 @@
   <meta property="og:description" content="Turn a 2D image into a shareable interactive 3D model scene.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="shortcut icon" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -701,13 +704,31 @@
       display: grid;
       grid-template-columns: 1fr;
       place-items: center;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(255, 255, 255, .08), transparent 18%),
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .06), transparent 32%),
-        #111213;
+      background: #111213;
       color: #ffffff;
       overflow: hidden;
       position: relative;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+      background: #111213;
+    }
+
+    .hero-video-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255, 255, 255, .08), transparent 24%),
+        linear-gradient(180deg, rgba(17, 18, 19, .36), rgba(17, 18, 19, .16) 42%, rgba(17, 18, 19, .52));
+      pointer-events: none;
     }
 
     .hero-copy {
@@ -736,7 +757,7 @@
     }
 
     .hero h1::after {
-      content: "Turn a 2D image into a shareable interactive 3D model. Experience the future of visual transformation.";
+      content: "Free to use. Turn one 2D image into a shareable interactive 3D model every day.";
       display: block;
       max-width: 570px;
       margin: 18px auto 0;
@@ -749,34 +770,9 @@
       text-shadow: none;
     }
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      top: 188px;
-      left: 50%;
-      width: 176px;
-      height: 176px;
-      border-radius: 50%;
-      transform: translateX(-50%);
-      background:
-        radial-gradient(circle at 46% 34%, #ffffff 0 34%, #f4f0e9 35% 55%, #cac5bd 78%, #ffffff 100%);
-      box-shadow: 0 0 65px rgba(255, 255, 255, .22);
-      z-index: 1;
-    }
-
+    .hero::before,
     .hero::after {
-      content: "";
-      position: absolute;
-      top: 386px;
-      left: 50%;
-      width: 500px;
-      height: 112px;
-      transform: translateX(-50%);
-      border-radius: 50%;
-      background:
-        radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, .98) 0 22%, rgba(255, 255, 255, .58) 34%, transparent 68%);
-      filter: blur(10px);
-      z-index: 1;
+      display: none;
     }
 
     .upload-panel {
@@ -877,7 +873,7 @@
     }
 
     .hero .upload-panel::after {
-      content: "NO INSTALL. AI 2D TO 3D EXPORT.";
+      content: "FREE DAILY GENERATION. NO INSTALL. AI 2D TO 3D EXPORT.";
       display: block;
       margin-top: 18px;
       color: rgba(255, 255, 255, .7);
@@ -1373,13 +1369,17 @@
           <span class="user-name" id="userName"></span>
           <button class="btn soft" id="logoutBtn" type="button">Log out</button>
         </div>
-        <a class="btn" href="#generator">Get Started</a>
+        <a class="btn" href="#generator">Use Free</a>
       </div>
     </div>
   </header>
 
   <main id="top">
     <section class="wrap hero" id="product">
+      <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="https://changhai-1259287001.cos.ap-beijing.myqcloud.com/%E4%B8%8D%E8%A6%81%E6%A1%8C%E5%AD%90%EF%BC%8C%E5%B0%B1%E5%83%8F%E9%82%A3%E7%A7%8D_D_%E7%9A%84%E5%8F%AF%E6%97%8B%E8%BD%AC%E7%9A%84%E5%9B%BE%E5%83%8F%E9%82%A3%E6%A0%B7%E7%9A%84_%E6%BC%94%E7%A4%BA%E8%A7%86%E9%A2%91%E4%B8%80%E6%A0%B7.mp4" type="video/mp4">
+      </video>
+      <div class="hero-video-overlay" aria-hidden="true"></div>
       <div class="hero-copy">
         <span class="eyebrow"><span class="dot"></span> 1 free image to 3D model generation per day</span>
         <div>
@@ -1408,7 +1408,7 @@
             </div>
 
             <div class="generation-actions">
-              <button class="btn clay" id="generateBtn" type="submit">Upload Image</button>
+              <button class="btn clay" id="generateBtn" type="submit">Generate Free</button>
               <button class="btn secondary" id="sampleBtn" type="button">Try sample image</button>
             </div>
 
@@ -1510,7 +1510,7 @@
     <section class="wrap section" id="pricing">
       <div class="section-title">
         <h2>Choose Your Creative Path</h2>
-        <p>Flexible plans for creators, artists, and pro studios.</p>
+        <p>Start with one free 3D generation every day. Upgrade only when you need more.</p>
         <div class="pricing-toggle" aria-label="Billing options">
           <span>Monthly</span>
           <span class="toggle-dot"></span>
@@ -1564,9 +1564,9 @@
     <section class="studio-strip" aria-label="Atelier studio preview"></section>
 
     <section class="wrap final-cta">
-      <h2>Ready to start creating?</h2>
-      <p>Join thousands of artists and studios building the future of 3D content.</p>
-      <a class="btn clay" href="#generator">Start for free</a>
+      <h2>Start creating for free.</h2>
+      <p>Use your free daily generation and turn an image into a 3D preview today.</p>
+      <a class="btn clay" href="#generator">Use free today</a>
     </section>
 
     <section class="wrap section" id="faq">
